@@ -85,15 +85,31 @@ function renderHome() {
 }
 
 // ───────── 장 ─────────
+// 절 번호가 3단계(05.1.3)면 하위 항목: 장 목차에서 부모 절(05.1) 아래 접었다 펼 수 있는 하위 메뉴로 보여 준다
+const isSub = s => s.no.split('.').length > 2;
+const parentNo = s => s.no.split('.').slice(0, 2).join('.');
+const subsOf = (c, s) => c.sections.filter(x => isSub(x) && parentNo(x) === s.no);
+const closedSubs = new Set();                 // 사용자가 접은 하위 메뉴 (기본은 펼침)
+const secBtn = (c, s, sub) => `<button class="sec${sub ? ' sub' : ''}" data-s="${s.no}"><span class="k">${s.no}</span><span class="t">${esc(s.title)}${s.term ? `<small>${esc(s.term.mean)}</small>` : ''}</span><span class="ck">${prog[skey(c, s)] ? '✓' : '›'}</span></button>`;
 function renderChapter(c) {
   $('#title').textContent = `${c.no}장 ${c.title}`;
   view.innerHTML = `<div class="stack">
     <div class="lhead"><span class="k">CHAPTER ${c.no}</span><h2>${c.title}</h2></div>
     ${c.goals.length ? `<div class="goals"><h3>🎯 학습 목표</h3><ul>${c.goals.map(g => `<li>${g}</li>`).join('')}</ul></div>` : ''}
-    ${c.sections.map(s => `<button class="sec" data-s="${s.no}"><span class="k">${s.no}</span><span class="t">${esc(s.title)}${s.term ? `<small>${esc(s.term.mean)}</small>` : ''}</span><span class="ck">${prog[skey(c, s)] ? '✓' : '›'}</span></button>`).join('')}
+    ${c.sections.filter(s => !isSub(s)).map(s => {
+      const subs = subsOf(c, s);
+      if (!subs.length) return secBtn(c, s);
+      const open = !closedSubs.has(s.no), done = subs.filter(x => prog[skey(c, x)]).length;
+      return secBtn(c, s) + `<div class="subgrp"><button class="subtg" data-tg="${s.no}">${open ? '▾' : '▸'} ${esc(s.title.split(' · ')[0])}의 대표 모델 ${subs.length}개 <small>(${done}/${subs.length})</small></button>
+        <div class="subs" ${open ? '' : 'hidden'}>${subs.map(x => secBtn(c, x, true)).join('')}</div></div>`;
+    }).join('')}
     ${c.quiz.length ? `<button class="qbtn" id="qb">📝 총정리 퀴즈 ${c.quiz.length}문제 ${prog['q/' + c.no] ? '· 완료 ✓' : ''}</button>` : ''}
   </div>`;
   view.querySelectorAll('[data-s]').forEach(b => b.onclick = () => go(`#/c/${c.no}/${b.dataset.s}`));
+  view.querySelectorAll('[data-tg]').forEach(b => b.onclick = () => {
+    const k = b.dataset.tg; closedSubs.has(k) ? closedSubs.delete(k) : closedSubs.add(k);
+    const y = scrollY; renderChapter(c); scrollTo(0, y);
+  });
   const qb = $('#qb'); if (qb) qb.onclick = () => go(`#/q/${c.no}`);
 }
 
@@ -104,10 +120,11 @@ function renderSection(c, s) {
   const t = TERMS.find(x => x.s === s);
   $('#title').textContent = `${s.no} ${s.title}`;
   view.innerHTML = `<div class="stack">
-    <div class="lhead"><span class="k">${c.no}장 ${c.title} · ${i + 1} / ${c.sections.length}</span><h2>${esc(s.title)}</h2></div>
+    <div class="lhead"><span class="k">${c.no}장 ${c.title}${isSub(s) ? ` › ${esc(c.sections.find(x => x.no === parentNo(s)).title.split(' · ')[0])}` : ''} · ${i + 1} / ${c.sections.length}</span><h2>${esc(s.title)}</h2></div>
     ${t ? `<div class="termcard"><span class="en">${esc(t.en)}</span><p>${esc(t.mean)}</p>
       <button class="kbtn ${known(t) ? 'on' : ''}" id="kb">${known(t) ? '✓ 외웠어요' : '☆ 외운 용어로 표시'}</button></div>` : ''}
     <div class="card body">${s.html}</div>
+    ${subsOf(c, s).length ? `<div class="card"><h3 style="margin:0 0 4px;font-size:16px">📂 ${esc(s.title.split(' · ')[0])}의 대표 모델 ${subsOf(c, s).length}개</h3>${subsOf(c, s).map(x => secBtn(c, x, true)).join('')}</div>` : ''}
     <div class="nav2">
       ${prev ? `<button data-go="#/c/${c.no}/${prev.no}">‹ 이전</button>` : `<button data-go="#/c/${c.no}">‹ 목차</button>`}
       ${next ? `<button class="pri" data-go="#/c/${c.no}/${next.no}">다음 ›</button>`
@@ -115,6 +132,7 @@ function renderSection(c, s) {
         : nextCh ? `<button class="pri" data-go="#/c/${nextCh.no}">다음 장 ›</button>` : `<button class="pri" data-go="#/">홈</button>`}
     </div></div>`;
   view.querySelectorAll('[data-go]').forEach(b => b.onclick = () => go(b.dataset.go));
+  view.querySelectorAll('.card [data-s]').forEach(b => b.onclick = () => go(`#/c/${c.no}/${b.dataset.s}`));
   view.querySelectorAll('.cb[data-c]').forEach(el => codeBox(el, CODE[+el.dataset.c]));
   view.querySelectorAll('.body img').forEach(im => im.onclick = () => zoom(im));
   const kb = $('#kb');

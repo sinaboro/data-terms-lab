@@ -310,7 +310,62 @@ def clf_reg():
     save(fig, 'clf_reg')
 
 
+# 머신러닝 모델 지도: 지도학습(분류·회귀) / 비지도학습(군집·차원 축소·기타)
+def ml_map():
+    fig, ax = plt.subplots(figsize=(9, 4.1)); ax.axis('off'); ax.set_xlim(0, 10); ax.set_ylim(0.45, 5.9)
+    def box(x, y, w, h, t, c, fc='white', fs=9.5, bold=False):
+        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle='round,pad=0.03', fc=fc, ec=c, lw=1.6))
+        ax.text(x + w / 2, y + h / 2, t, ha='center', va='center', fontsize=fs, color=c if fc == 'white' else 'white', fontweight='bold' if bold else 'normal')
+    box(3.6, 5.2, 2.8, .6, '머신러닝', GRAY, GRAY, 12, True)
+    box(.4, 4.0, 4.2, .7, '지도학습 (정답 있음)', BLUE, BLUE, 11, True)
+    box(5.4, 4.0, 4.2, .7, '비지도학습 (정답 없음)', ORANGE, ORANGE, 11, True)
+    for x in (2.5, 7.5): ax.plot([5, x], [5.2, 4.7], color=GRAY, lw=1.5)
+    cols = [(.4, '분류 · 회귀 모두', ['선형/로지스틱 회귀', 'K-최근접 이웃(KNN)', '결정 트리', '랜덤 포레스트', '그레이디언트 부스팅', 'SVM', '나이브 베이즈(분류)', '신경망(MLP)'], BLUE),
+            (5.4, '군집 · 차원 축소 · 기타', ['K-평균(K-Means)', '계층적 군집', 'DBSCAN', '주성분 분석(PCA)', 't-SNE', '연관 규칙(장바구니)', '이상 탐지'], ORANGE)]
+    for x0, head, names, c in cols:
+        ax.text(x0 + 2.1, 3.65, head, ha='center', fontsize=9, color=c)
+        for k, n in enumerate(names):
+            box(x0 + (k % 2) * 2.15, 2.75 - (k // 2) * .72, 2.0, .55, n, c, fs=9)
+    save(fig, 'ml_map')
+
+
+# 지도학습 모델 4개가 같은 데이터를 나누는 방식(결정 경계) 비교
+def sup_boundary():
+    from sklearn.datasets import make_moons
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.neighbors import KNeighborsClassifier
+    from sklearn.tree import DecisionTreeClassifier
+    from sklearn.svm import SVC
+    X, y = make_moons(200, noise=.25, random_state=0)
+    xx, yy = np.meshgrid(np.linspace(-1.6, 2.6, 200), np.linspace(-1.2, 1.7, 200))
+    models = [('로지스틱 회귀 (직선)', LogisticRegression()), ('KNN (가까운 이웃)', KNeighborsClassifier(7)),
+              ('결정 트리 (계단 모양)', DecisionTreeClassifier(max_depth=5, random_state=0)), ('SVM (부드러운 곡선)', SVC(gamma=2))]
+    fig, axs = plt.subplots(1, 4, figsize=(11, 3))
+    for ax, (t, m) in zip(axs, models):
+        m.fit(X, y); z = m.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
+        ax.contourf(xx, yy, z, alpha=.25, cmap='coolwarm'); ax.scatter(*X.T, c=y, cmap='coolwarm', s=10, edgecolor='white', lw=.3)
+        ax.set_title(f'{t}\n정확도 {m.score(X, y):.2f}', fontsize=10); ax.set_xticks([]); ax.set_yticks([])
+    save(fig, 'sup_boundary')
+
+
+# 비지도 군집 비교: K-Means 는 동그란 무리, DBSCAN 은 빽빽한 모양을 따라 묶는다 + 계층적 군집 덴드로그램
+def unsup_compare():
+    from sklearn.datasets import make_moons
+    from sklearn.cluster import KMeans, DBSCAN
+    from scipy.cluster.hierarchy import dendrogram, linkage
+    X, _ = make_moons(200, noise=.06, random_state=1)
+    fig, axs = plt.subplots(1, 3, figsize=(11, 3.2))
+    for ax, (t, lab) in zip(axs[:2], [('K-Means (k=2): 동그랗게 자름', KMeans(2, n_init=10, random_state=0).fit_predict(X)),
+                                       ('DBSCAN: 빽빽한 모양을 따라감', DBSCAN(eps=.2).fit_predict(X))]):
+        ax.scatter(*X.T, c=lab, cmap='coolwarm', s=12); ax.set_title(t, fontsize=10); ax.set_xticks([]); ax.set_yticks([])
+    pts = np.random.default_rng(3).normal(size=(12, 2)) + np.repeat([[0, 0], [4, 4], [0, 5]], 4, axis=0)
+    dendrogram(linkage(pts, 'ward'), ax=axs[2], color_threshold=4, above_threshold_color=GRAY)
+    axs[2].set_title('계층적 군집: 가까운 것부터 차례로 합침', fontsize=10); axs[2].set_yticks([]); axs[2].set_xlabel('데이터 번호')
+    save(fig, 'unsup_compare')
+
+
 if __name__ == '__main__':
     for f in [mean_median_mode, variance, quartile_box, correlation, skewness, kurtosis, scaling, histogram, normal_dist, scatter, heatmap,
-              fitting, split, confusion, roc, regression, kmeans, elbow, axis, cohort, funnel, ab_test, flow, clf_reg]:
+              fitting, split, confusion, roc, regression, kmeans, elbow, axis, cohort, funnel, ab_test, flow, clf_reg,
+              ml_map, sup_boundary, unsup_compare]:
         f()

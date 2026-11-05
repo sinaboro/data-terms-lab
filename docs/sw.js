@@ -1,8 +1,8 @@
 // 서비스 워커: 앱 파일·그림과 파이썬 실행기(Pyodide)를 폰에 저장해 두고 인터넷 없이도 쓰게 한다.
 // 내용을 고치면 VERSION 숫자를 올려야 폰에서 새 버전을 받는다 (tools/build_app.py --bump).
-const VERSION = 'data-terms-v1';
+const VERSION = 'data-terms-v2';
 const PY_CACHE = 'data-terms-pyodide';               // 파이썬 실행기·패키지는 버전이 바뀌어도 다시 받지 않게 따로 보관
-const FIGS = ["figs/ab_test.png", "figs/axis.png", "figs/clf_reg.png", "figs/cohort.png", "figs/confusion.png", "figs/correlation.png", "figs/elbow.png", "figs/fitting.png", "figs/flow.png", "figs/funnel.png", "figs/heatmap.png", "figs/histogram.png", "figs/kmeans.png", "figs/kurtosis.png", "figs/mean_median_mode.png", "figs/normal_dist.png", "figs/quartile_box.png", "figs/regression.png", "figs/roc.png", "figs/scaling.png", "figs/scatter.png", "figs/skewness.png", "figs/split.png", "figs/variance.png"];
+const FIGS = ["figs/ab_test.png", "figs/axis.png", "figs/clf_reg.png", "figs/cohort.png", "figs/confusion.png", "figs/correlation.png", "figs/elbow.png", "figs/fitting.png", "figs/flow.png", "figs/funnel.png", "figs/heatmap.png", "figs/histogram.png", "figs/kmeans.png", "figs/kurtosis.png", "figs/mean_median_mode.png", "figs/ml_map.png", "figs/normal_dist.png", "figs/quartile_box.png", "figs/regression.png", "figs/roc.png", "figs/scaling.png", "figs/scatter.png", "figs/skewness.png", "figs/split.png", "figs/sup_boundary.png", "figs/unsup_compare.png", "figs/variance.png"];
 const FILES = ['./', 'index.html', 'app.js', 'content.js', 'manifest.json', 'install-helper.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png', ...FIGS];
 

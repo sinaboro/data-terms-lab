@@ -83,6 +83,8 @@ ST = {
     'opt': S('opt', fontSize=9.5, leading=14, leftIndent=12),
     'toc0': S('toc0', fontName='MalgunB', fontSize=11, leading=19),
     'toc1': S('toc1', fontSize=9.5, leading=15, leftIndent=14, textColor=GRAY),
+    'toc2': S('toc2', fontSize=8.8, leading=13.5, leftIndent=30, textColor=GRAY),
+    'h2s': S('h2s', fontName='MalgunB', fontSize=12.5, leading=18, textColor=NAVY, spaceBefore=10, spaceAfter=5),
 }
 
 # ───────── 글 다듬기 ─────────
@@ -324,7 +326,7 @@ def main():
     from reportlab.platypus import NextPageTemplate
     story.insert(0, NextPageTemplate('body'))
     story += intro()
-    toc = TableOfContents(levelStyles=[ST['toc0'], ST['toc1']], dotsMinLevel=0)
+    toc = TableOfContents(levelStyles=[ST['toc0'], ST['toc1'], ST['toc2']], dotsMinLevel=0)
     story += [Paragraph('목차', ST['h1']), Spacer(1, 4), toc, PageBreak()]
     for ch in chs:
         is_app = ch['no'] == '부록'
@@ -336,7 +338,8 @@ def main():
         for sec in ch['sections']:
             if sec['title'] != '들어가며':
                 label = f'부록 {sec["no"]}. {sec["title"]}' if is_app else f'{sec["no"]} {sec["title"]}'
-                h = heading(label, ST['h2'], 1)
+                sub = sec['no'].count('.') >= 2            # 05.1.3 같은 하위 항목은 목차 한 단계 아래
+                h = heading(label, ST['h2s'] if sub else ST['h2'], 2 if sub else 1)
                 story.append(KeepTogether([h, term_box(sec['term'])]) if sec.get('term') else h)
             story += blocks(sec['blocks'])
             if is_app and sec['no'] == 'D':

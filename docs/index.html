@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>데이터 분석 용어 랩</title>
-<meta name="description" content="데이터 분석 초보자를 위한 용어 학습 앱. 용어 105개를 쉬운 설명·그림·실행 예제·카드 퀴즈로 익혀요.">
+<meta name="description" content="데이터 분석 초보자를 위한 용어 학습 앱. 용어 121개를 쉬운 설명·그림·실행 예제·카드 퀴즈로 익혀요.">
 <meta name="theme-color" content="#0f5e5a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -123,6 +123,13 @@
   .toast{position:fixed;left:50%;bottom:calc(var(--tabbar) + 16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:14px;z-index:9;max-width:90%;text-align:center}
 
   /* 용어 카드 · 그림 · 용어 찾기 · 카드 퀴즈 */
+  .subgrp{margin:-4px 0 0 14px;border-left:2px solid var(--accent2);padding-left:10px;display:flex;flex-direction:column;gap:6px}
+  .subtg{align-self:flex-start;border:0;background:var(--accent-soft);color:var(--accent2);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:800}
+  .subtg small{font-weight:600;color:var(--muted)}
+  .subs{display:flex;flex-direction:column;gap:6px}
+  .sec.sub{padding:8px 12px;margin-top:6px}
+  .subs .sec.sub{margin-top:0}
+  .sec.sub .k{font-size:12px;min-width:44px}
   .sec .t small{display:block;color:var(--muted);font-size:12.5px;line-height:1.45}
   .termcard{background:var(--accent-soft);border:1.5px solid var(--accent2);border-radius:16px;padding:12px 14px}
   .termcard .en{font-weight:800;color:var(--accent2);font-size:14px}

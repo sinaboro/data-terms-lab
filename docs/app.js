@@ -100,7 +100,7 @@ function renderChapter(c) {
       const subs = subsOf(c, s);
       if (!subs.length) return secBtn(c, s);
       const open = !closedSubs.has(s.no), done = subs.filter(x => prog[skey(c, x)]).length;
-      return secBtn(c, s) + `<div class="subgrp"><button class="subtg" data-tg="${s.no}">${open ? '▾' : '▸'} ${esc(s.title.split(' · ')[0])}의 대표 모델 ${subs.length}개 <small>(${done}/${subs.length})</small></button>
+      return secBtn(c, s) + `<div class="subgrp"><button class="subtg" data-tg="${s.no}">${open ? '▾' : '▸'} ${esc(s.title.split(' · ')[0])} ${esc(s.sub || '하위 항목')} ${subs.length}개 <small>(${done}/${subs.length})</small></button>
         <div class="subs" ${open ? '' : 'hidden'}>${subs.map(x => secBtn(c, x, true)).join('')}</div></div>`;
     }).join('')}
     ${c.quiz.length ? `<button class="qbtn" id="qb">📝 총정리 퀴즈 ${c.quiz.length}문제 ${prog['q/' + c.no] ? '· 완료 ✓' : ''}</button>` : ''}
@@ -124,7 +124,7 @@ function renderSection(c, s) {
     ${t ? `<div class="termcard"><span class="en">${esc(t.en)}</span><p>${esc(t.mean)}</p>
       <button class="kbtn ${known(t) ? 'on' : ''}" id="kb">${known(t) ? '✓ 외웠어요' : '☆ 외운 용어로 표시'}</button></div>` : ''}
     <div class="card body">${s.html}</div>
-    ${subsOf(c, s).length ? `<div class="card"><h3 style="margin:0 0 4px;font-size:16px">📂 ${esc(s.title.split(' · ')[0])}의 대표 모델 ${subsOf(c, s).length}개</h3>${subsOf(c, s).map(x => secBtn(c, x, true)).join('')}</div>` : ''}
+    ${subsOf(c, s).length ? `<div class="card"><h3 style="margin:0 0 4px;font-size:16px">📂 ${esc(s.title.split(' · ')[0])} ${esc(s.sub || '하위 항목')} ${subsOf(c, s).length}개</h3>${subsOf(c, s).map(x => secBtn(c, x, true)).join('')}</div>` : ''}
     <div class="nav2">
       ${prev ? `<button data-go="#/c/${c.no}/${prev.no}">‹ 이전</button>` : `<button data-go="#/c/${c.no}">‹ 목차</button>`}
       ${next ? `<button class="pri" data-go="#/c/${c.no}/${next.no}">다음 ›</button>`

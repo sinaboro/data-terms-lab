@@ -5,10 +5,10 @@
 
 | 자료 | 위치 |
 |---|---|
-| 📄 학습 교안 (PDF, 86쪽) | [데이터분석_용어_학습교안.pdf](데이터분석_용어_학습교안.pdf) |
+| 📄 학습 교안 (PDF, 110쪽) | [데이터분석_용어_학습교안.pdf](데이터분석_용어_학습교안.pdf) |
 | 📱 학습 앱 | **https://sinaboro.github.io/data-terms-lab/** |
 
-## 목차 (용어 121개 · 그림 27개 · 예제 104개 · 퀴즈 59문제)
+## 목차 (용어 161개 · 그림 40개 · 예제 123개 · 퀴즈 74문제)
 
 | 장 | 다루는 용어 |
 |---|---|
@@ -22,6 +22,8 @@
 | 08 데이터 분석 전체 흐름 | 수집 → 전처리 → EDA → 피처 엔지니어링 → 모델 학습 → 평가·해석 (작은 예제로 처음부터 끝까지) |
 | 09 파이썬·pandas 용어 | dtype, Series, DataFrame, axis, inplace, delimiter, describe, numeric_only, query, agg, statistic, matplotlib, scatter, prompt |
 | 10 통계 모델·분석 분야 용어 | Regression(이름의 유래), LinearRegression, Intercept, Coefficient, statsmodels, OLS, Shapiro-Wilk, KMeans, Elbow, 패널 데이터, 금융 데이터, 계량 분석, 표준화 vs 정규화 |
+| 11 인공지능(딥러닝) 학습 용어 | Pre-training, Fine-tuning, 토큰·sentencepiece, 임베딩, 순전파·역전파, 엔트로피, 최적화 (하위: 손실 함수·기울기·학습률), 옵티마이저 (하위: SGD·Momentum·AdaGrad·RMSProp·Adam), 에포크, 배치 크기, 이터레이션, 분류기, 감성 분석, Pydantic, SpooledTemporaryFile |
+| 12 프롬프트 엔지니어링·생성형 AI 용어 | Prompt, System·User Prompt, Zero·One·Few-shot, Chain of Thought, Context Window, Token, Temperature, Prompt Chaining, RAG, Hallucination, Role/Persona, Format Constraint, Prompt Library, 기법 선택 가이드 |
 
 교안 맨 뒤에 **퀴즈 정답과 해설**, 가나다순 **용어 찾아보기**가 있어요.
 
@@ -51,14 +53,14 @@
 
 ```
 pip install reportlab pillow pandas scikit-learn scipy statsmodels matplotlib pymupdf
-python tools/make_figs.py          # 설명 그림 27개 (guide/figs/)
+python tools/make_figs.py          # 설명 그림 40개 (guide/figs/)
 python tools/build_pdf.py          # 교안 PDF (예제를 실제로 실행해 결과를 넣음)
 python tools/build_app.py --bump   # 앱 내용 docs/content.js + 그림 복사 + 앱 버전 올리기
 ```
 
 | 파일·폴더 | 설명 |
 |---|---|
-| `guide/ch01.md` ~ `ch10.md` | 원고. 문법은 `tools/guide_lib.py` 맨 위 설명 참고 |
+| `guide/ch01.md` ~ `ch12.md` | 원고. 문법은 `tools/guide_lib.py` 맨 위 설명 참고 |
 | `guide/figs/` | 설명 그림 (`tools/make_figs.py` 가 matplotlib 으로 만듦) |
 | `tools/guide_lib.py` | 원고 읽기 + 예제 실행 (공통, 같은 장의 예제는 이어서 실행) |
 | `tools/build_pdf.py` | 교안 PDF 만들기 (ReportLab, 맑은 고딕 + D2Coding) |

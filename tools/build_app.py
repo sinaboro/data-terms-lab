@@ -77,6 +77,8 @@ def main():
             item = {'no': s['no'], 'title': s['title'], 'html': to_html(s['blocks'], codes, ch['no'], runs)}
             if s.get('term'):
                 item['term'] = s['term']
+            if s.get('sub'):
+                item['sub'] = s['sub']
             secs.append(item)
         data.append({'no': ch['no'], 'title': ch['title'], 'goals': [inline(g) for g in ch['goals']],
                      'sections': secs, 'quiz': [{'q': inline(q['q']), 'o': [inline(o) for o in q['o']], 'a': q['a'], 'e': inline(q['e'])} for q in ch['quiz']]})

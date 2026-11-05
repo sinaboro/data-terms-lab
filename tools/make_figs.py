@@ -364,8 +364,227 @@ def unsup_compare():
     save(fig, 'unsup_compare')
 
 
+# ───────── 11·12장 인공지능 용어 그림 ─────────
+def _box(ax, x, y, w, h, t, c, fill=True, fs=9.5, tc=None):
+    ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle='round,pad=0.03', fc=c if fill else 'white', ec=c, lw=1.6))
+    ax.text(x + w / 2, y + h / 2, t, ha='center', va='center', fontsize=fs, color=tc or ('white' if fill else c), fontweight='bold' if fill else 'normal')
+
+
+def _arrow(ax, a, b, c=ORANGE):
+    ax.annotate('', b, a, arrowprops=dict(arrowstyle='->', color=c, lw=2))
+
+
+# 사전학습 → 미세조정
+def pretrain_finetune():
+    fig, ax = plt.subplots(figsize=(9, 3)); ax.axis('off'); ax.set_xlim(0, 10); ax.set_ylim(0, 3.2)
+    _box(ax, .1, 1.1, 2.2, 1.0, '아주 많은 글\n(책·뉴스·웹 문서)', GRAY, False)
+    _arrow(ax, (2.4, 1.6), (3.1, 1.6))
+    _box(ax, 3.2, 1.1, 2.4, 1.0, '사전학습 모델\n(기본 언어 능력)', BLUE)
+    ax.text(4.4, 2.45, 'Pre-training: 넓고 다양하게 미리 공부', ha='center', fontsize=9, color=BLUE)
+    for k, (t, y) in enumerate([('번역 데이터 → 번역 모델', 2.3), ('요약 데이터 → 요약 모델', 1.35), ('리뷰 데이터 → 감성 분석', .4)]):
+        _arrow(ax, (5.7, 1.6), (6.5, y + .3), GREEN)
+        _box(ax, 6.55, y, 3.3, .6, t, GREEN, False, 9)
+    ax.text(8.2, 3.05, 'Fine-tuning: 하고 싶은 일에 맞춰 추가 학습', ha='center', fontsize=9, color=GREEN)
+    save(fig, 'pretrain_finetune')
+
+
+# 토큰화: 문장을 조각(subword)으로
+def tokenize():
+    fig, ax = plt.subplots(figsize=(9, 2.6)); ax.axis('off'); ax.set_xlim(0, 10); ax.set_ylim(0, 3)
+    ax.text(.1, 2.5, '문장:  "데이터분석은 재미있다"', fontsize=11)
+    rows = [('단어 단위', ['데이터분석은', '재미있다'], GRAY), ('subword 조각', ['▁데이터', '분석', '은', '▁재미', '있다'], BLUE)]
+    for r, (name, toks, c) in enumerate(rows):
+        y = 1.55 - r * 1.0
+        ax.text(.1, y + .25, name, fontsize=9.5, color=c, fontweight='bold')
+        x = 1.9
+        for t in toks:
+            w = .35 + .32 * len(t)
+            _box(ax, x, y, w, .55, t, c, False, 10); x += w + .2
+        ax.text(x + .1, y + .25, f'→ 토큰 {len(toks)}개', fontsize=9.5, color=c)
+    save(fig, 'tokenize')
+
+
+# 임베딩: 뜻이 비슷한 낱말은 가까운 좌표에
+def embedding():
+    pts = {'왕': (1, 4.2), '여왕': (2.2, 4.5), '남자': (1.1, 2.7), '여자': (2.3, 3.0), '강아지': (5.2, 1.4), '고양이': (5.9, 1.9),
+           '사과': (7.6, 4.1), '바나나': (8.3, 3.6), '포도': (7.9, 4.8)}
+    fig, ax = plt.subplots(figsize=(7, 3.6))
+    for w, (x, y) in pts.items():
+        ax.scatter(x, y, s=60, color=BLUE); ax.text(x + .12, y + .12, w, fontsize=10.5)
+    for a, b in [('왕', '여왕'), ('남자', '여자')]:
+        ax.annotate('', pts[b], pts[a], arrowprops=dict(arrowstyle='->', color=ORANGE, lw=1.6))
+    for t, (x, y) in [('사람', (1.5, 1.9)), ('동물', (5.4, .6)), ('과일', (7.9, 2.8))]:
+        ax.text(x, y, t, fontsize=9, color=GRAY)
+    ax.set_xlim(0, 9.5); ax.set_ylim(0, 5.5); ax.set_xticks([]); ax.set_yticks([])
+    ax.set_title('임베딩: 낱말을 숫자 좌표(벡터)로 — 뜻이 비슷하면 가깝다', fontsize=10.5)
+    save(fig, 'embedding')
+
+
+# 엔트로피: 확신 vs 갈팡질팡
+def entropy():
+    fig, axs = plt.subplots(1, 3, figsize=(9, 2.8), sharey=True)
+    for ax, (t, p) in zip(axs, [('확신함', [.94, .03, .03]), ('조금 헷갈림', [.6, .3, .1]), ('갈팡질팡', [.34, .33, .33])]):
+        p = np.array(p); h = -(p * np.log2(p)).sum()
+        ax.bar(['고양이', '강아지', '토끼'], p, color=[BLUE, '#9db8ee', '#c9d7f5'])
+        ax.set_title(f'{t}\n엔트로피 {h:.2f}', fontsize=10); ax.set_ylim(0, 1)
+    axs[0].set_ylabel('모델이 준 확률')
+    save(fig, 'entropy')
+
+
+# 경사하강법과 학습률: 너무 작음 / 적당 / 너무 큼
+def learning_rate():
+    f = lambda w: (w - 3) ** 2 + 1
+    ws = np.linspace(-2.5, 8.5, 200)
+    fig, axs = plt.subplots(1, 3, figsize=(10, 3))
+    for ax, (t, lr) in zip(axs, [('학습률 너무 작음: 느림', .03), ('학습률 적당: 빨리 바닥', .3), ('학습률 너무 큼: 튀어 다님', .98)]):
+        ax.plot(ws, f(ws), color=GRAY)
+        w, path = -1.5, []
+        for _ in range(10):
+            path.append(w); w = w - lr * 2 * (w - 3)
+        path = np.array(path)
+        ax.plot(path, f(path), 'o-', color=ORANGE, ms=4, lw=1.2)
+        ax.scatter([3], [1], marker='*', s=150, color=GREEN, zorder=5)
+        ax.set_title(t, fontsize=10); ax.set_xticks([]); ax.set_yticks([]); ax.set_xlabel('가중치 w'); ax.set_ylim(0, 35)
+    axs[0].set_ylabel('손실(Loss)')
+    save(fig, 'learning_rate')
+
+
+# 옵티마이저 비교: 길쭉한 골짜기에서 SGD / Momentum / Adam 경로
+def optimizers():
+    a, b = 1.0, 12.0                                   # 손실 = a·x² + b·y² (y 방향이 가파른 골짜기)
+    grad = lambda p: np.array([2 * a * p[0], 2 * b * p[1]])
+    def run(kind, steps=40):
+        p, v, s, m = np.array([-4.5, 1.6]), np.zeros(2), np.zeros(2), np.zeros(2)
+        path = [p.copy()]
+        for t in range(1, steps + 1):
+            g = grad(p)
+            if kind == 'SGD':
+                p = p - .075 * g
+            elif kind == 'Momentum':
+                v = .8 * v - .03 * g; p = p + v
+            else:                                           # Adam
+                m = .9 * m + .1 * g; s = .999 * s + .001 * g * g
+                mh, sh = m / (1 - .9 ** t), s / (1 - .999 ** t)
+                p = p - .2 * mh / (np.sqrt(sh) + 1e-8)
+            path.append(p.copy())
+        return np.array(path)
+    x, y = np.meshgrid(np.linspace(-5, 2.2, 200), np.linspace(-2, 2, 200))
+    fig, ax = plt.subplots(figsize=(8, 3.6))
+    ax.contour(x, y, a * x ** 2 + b * y ** 2, levels=15, colors='#d5dae4')
+    for kind, c in [('SGD', GRAY), ('Momentum', ORANGE), ('Adam', BLUE)]:
+        pth = run(kind); ax.plot(*pth.T, 'o-', ms=2.5, lw=1.3, color=c, label=kind)
+    ax.scatter([0], [0], marker='*', s=200, color=GREEN, zorder=5, label='목표(손실 최소)')
+    ax.legend(frameon=False, fontsize=9, loc='lower right'); ax.set_xticks([]); ax.set_yticks([])
+    ax.set_title('옵티마이저마다 골짜기 바닥으로 내려가는 길이 다르다 (40걸음)', fontsize=10.5)
+    save(fig, 'optimizers')
+
+
+# 에포크 · 배치 · 이터레이션
+def epoch_batch():
+    fig, ax = plt.subplots(figsize=(9, 2.8)); ax.axis('off'); ax.set_xlim(0, 10.4); ax.set_ylim(0, 3)
+    ax.text(.1, 2.6, '데이터 1,000개, 배치 크기 100 → 1 에포크 = 10 이터레이션', fontsize=10.5, fontweight='bold')
+    for k in range(10):
+        _box(ax, .1 + k * 1.02, 1.3, .92, .8, f'배치 {k + 1}\n100개', BLUE if k < 3 else '#9db8ee', fs=8.5)
+    ax.text(.1, .85, '배치 1개로 공부하고 가중치를 한 번 고치면 = 이터레이션 1번', fontsize=9.3, color=BLUE)
+    ax.text(.1, .35, '배치 10개를 다 돌아 1,000개를 한 번씩 다 보면 = 에포크 1번  (에포크 10 = 이 과정을 10번 반복)', fontsize=9.3, color=ORANGE)
+    save(fig, 'epoch_batch')
+
+
+# 에포크에 따른 손실: 과소적합 → 적당 → 과적합
+def epoch_curve():
+    e = np.arange(1, 61)
+    tr = 2.2 * np.exp(-e / 9) + .15
+    va = 2.2 * np.exp(-e / 9) + .3 + .0009 * np.maximum(0, e - 18) ** 2
+    fig, ax = plt.subplots(figsize=(7, 3.3))
+    ax.plot(e, tr, color=BLUE, label='훈련 손실'); ax.plot(e, va, color=ORANGE, label='검증 손실')
+    best = e[va.argmin()]
+    ax.axvline(best, color=GREEN, ls='--'); ax.text(best + 1, 2.0, f'여기서 멈춤\n(에포크 {best})', color=GREEN, fontsize=9)
+    ax.axvspan(1, 8, color='#e8edf7'); ax.text(2, 2.35, '과소적합', fontsize=9, color=GRAY)
+    ax.axvspan(40, 60, color='#fdecea'); ax.text(43, 2.35, '과적합', fontsize=9, color=RED)
+    ax.set_xlabel('에포크'); ax.set_ylabel('손실'); ax.legend(frameon=False, loc='center right'); ax.set_ylim(0, 2.6)
+    save(fig, 'epoch_curve')
+
+
+# 순전파 · 역전파
+def propagation():
+    fig, ax = plt.subplots(figsize=(8.5, 3.6)); ax.axis('off'); ax.set_xlim(0, 10); ax.set_ylim(-.1, 4.3); ax.set_aspect('equal')
+    layers = [(1.2, 3, '입력'), (4, 4, '은닉층'), (6.8, 2, '출력')]
+    pos = []
+    for x, n, t in layers:
+        ys = np.linspace(1.2, 3.2, n) if n > 1 else [2]
+        pos.append([(x, y) for y in ys]); ax.text(x, 3.55, t, ha='center', fontsize=9.5, color=GRAY)
+    for L in range(2):
+        for p in pos[L]:
+            for q in pos[L + 1]:
+                ax.plot([p[0], q[0]], [p[1], q[1]], color='#d5dae4', lw=1)
+    for L in pos:
+        for x, y in L:
+            ax.add_patch(plt.Circle((x, y), .22, color=BLUE, zorder=3))
+    _box(ax, 8.0, 1.6, 1.8, .8, '손실\n(틀린 정도)', RED, fs=9)
+    _arrow(ax, (1.2, 4.0), (6.8, 4.0), BLUE); ax.text(4, 4.1, '순전파: 입력 → 예측 계산', ha='center', fontsize=9.5, color=BLUE)
+    ax.annotate('', (1.2, .65), (8.9, .65), arrowprops=dict(arrowstyle='->', color=RED, lw=2))
+    ax.text(5.0, .1, '역전파: 손실을 거꾸로 전해 가중치 고치기', ha='center', fontsize=9.5, color=RED)
+    save(fig, 'propagation')
+
+
+# 온도(Temperature): 다음 낱말 확률이 달라진다
+def temperature():
+    words = ['맑음', '흐림', '비', '눈', '무지개']
+    logit = np.array([3.0, 2.0, 1.2, .3, -.5])
+    fig, axs = plt.subplots(1, 3, figsize=(10, 2.9), sharey=True)
+    for ax, T in zip(axs, [.3, 1.0, 2.0]):
+        p = np.exp(logit / T); p /= p.sum()
+        ax.bar(words, p, color=BLUE); ax.set_title(f'Temperature {T}', fontsize=10.5); ax.set_ylim(0, 1)
+        for i, v in enumerate(p): ax.text(i, v + .02, f'{v:.2f}', ha='center', fontsize=8)
+    axs[0].set_ylabel('다음 낱말 확률'); fig.suptitle('"내일 날씨는 ___"', fontsize=10.5, y=.98)
+    save(fig, 'temperature')
+
+
+# 제로샷 · 원샷 · 퓨샷
+def shots():
+    fig, ax = plt.subplots(figsize=(9, 2.7)); ax.axis('off'); ax.set_xlim(0, 9.3); ax.set_ylim(0, 3)
+    cols = [('Zero-shot', ['리뷰 감정을 분류해 줘', '"배송 빨라요" →'], GRAY), ('One-shot', ['예) "맛없어요" → 부정', '"배송 빨라요" →'], BLUE),
+            ('Few-shot', ['예) "맛없어요" → 부정', '예) "최고예요" → 긍정', '예) "그냥 그래요" → 중립', '"배송 빨라요" →'], GREEN)]
+    for k, (t, lines, c) in enumerate(cols):
+        x = .1 + k * 3.1
+        _box(ax, x, 2.35, 2.9, .5, t, c, fs=10.5)
+        ax.add_patch(FancyBboxPatch((x, .15), 2.9, 2.0, boxstyle='round,pad=0.03', fc='white', ec=c, lw=1.2))
+        for i, ln in enumerate(lines):
+            ax.text(x + .12, 1.85 - i * .42, ln, fontsize=9, color='#1b2033' if ln.startswith('예') else c)
+        ax.text(x + 1.45, .3, f'예시 {sum(l.startswith("예") for l in lines)}개', ha='center', fontsize=9, color=GRAY)
+    save(fig, 'shots')
+
+
+# RAG: 검색 → 끼워 넣기 → 답변
+def rag():
+    fig, ax = plt.subplots(figsize=(9.5, 2.6)); ax.axis('off'); ax.set_xlim(0, 10.4); ax.set_ylim(0, 2.6)
+    steps = [('① 질문', '"환불 기간은?"', GRAY), ('② 검색', '회사 문서에서\n관련 글 찾기', BLUE), ('③ 끼워 넣기', '질문 + 찾은 글\n→ 프롬프트', BLUE),
+             ('④ AI 답변', '문서에 근거한\n정확한 답', GREEN)]
+    for k, (t, s, c) in enumerate(steps):
+        x = .1 + k * 2.6
+        _box(ax, x, 1.5, 2.2, .6, t, c, fs=10.5)
+        ax.text(x + 1.1, .95, s, ha='center', va='center', fontsize=9)
+        if k < 3: _arrow(ax, (x + 2.25, 1.8), (x + 2.55, 1.8))
+    ax.text(5.2, .15, 'RAG = Retrieval(검색) + Augmented(보강) + Generation(생성): 모르는 내용을 지어내는 환각을 줄인다', ha='center', fontsize=9, color=ORANGE)
+    save(fig, 'rag')
+
+
+# 컨텍스트 윈도우: 한 번에 볼 수 있는 토큰 칸
+def context_window():
+    fig, ax = plt.subplots(figsize=(9, 2.1)); ax.axis('off'); ax.set_xlim(0, 10); ax.set_ylim(0, 2.1)
+    parts = [('시스템 프롬프트', 1.6, ORANGE), ('이전 대화', 2.6, GRAY), ('참고 문서(RAG)', 2.4, BLUE), ('이번 질문', 1.2, GREEN), ('답변 공간', 1.8, '#9db8ee')]
+    x = .1
+    for t, w, c in parts:
+        _box(ax, x, .8, w - .08, .7, t, c, fs=9); x += w
+    ax.annotate('', (9.7, .45), (.1, .45), arrowprops=dict(arrowstyle='<->', color=RED, lw=1.6))
+    ax.text(4.9, .1, '컨텍스트 윈도우: 이 칸(최대 토큰 수)을 넘으면 앞부분부터 잊거나 잘린다', ha='center', fontsize=9.3, color=RED)
+    save(fig, 'context_window')
+
+
 if __name__ == '__main__':
     for f in [mean_median_mode, variance, quartile_box, correlation, skewness, kurtosis, scaling, histogram, normal_dist, scatter, heatmap,
               fitting, split, confusion, roc, regression, kmeans, elbow, axis, cohort, funnel, ab_test, flow, clf_reg,
-              ml_map, sup_boundary, unsup_compare]:
+              ml_map, sup_boundary, unsup_compare,
+              pretrain_finetune, tokenize, embedding, entropy, learning_rate, optimizers, epoch_batch, epoch_curve,
+              propagation, temperature, shots, rag, context_window]:
         f()

@@ -17,6 +17,7 @@ build_pdf.py(교안 PDF), build_app.py(앱 데이터), build_code.py(실습코�
   ```text              그냥 글 상자 (터미널 화면 등)
   @quiz ... @end       ? 질문 / - 오답 / + 정답 / = 해설
   @term English | 뜻   절 바로 아래: 용어 사전·카드 퀴즈에 쓰는 메타
+  ## 05.1.3 | …        3단계 번호 = 하위 항목 (부모 절에 @sub 묶음이름)
   ![설명](figs/a.png)  그림
 """
 import builtins
@@ -78,6 +79,8 @@ def parse_file(path):
             no, title = [x.strip() for x in s[3:].split('|', 1)]
             sec = {'no': no, 'title': title, 'blocks': []}
             ch['sections'].append(sec)
+        elif s.startswith('@sub '):           # 하위 항목 묶음 이름: 앱 장 목차의 하위 메뉴 제목 (예: 대표 모델)
+            sec['sub'] = s[5:].strip()
         elif s.startswith('@term '):          # 용어 메타: @term 영어 | 한 줄 뜻 (검색·카드 퀴즈용)
             en, mean = [x.strip() for x in s[6:].split('|', 1)]
             sec['term'] = {'en': en, 'mean': mean}

@@ -254,7 +254,7 @@ def cover():
     badge = Table([[Paragraph('<font color="white"><b>학습 교안</b></font>', S('b', alignment=TA_CENTER, fontSize=12))]],
                   colWidths=[34 * mm], style=[('BACKGROUND', (0, 0), (-1, -1), ORANGE), ('TOPPADDING', (0, 0), (-1, -1), 5), ('BOTTOMPADDING', (0, 0), (-1, -1), 6)])
     return [Spacer(1, 55 * mm), badge, Spacer(1, 10 * mm), Paragraph('데이터 분석 용어', big), Paragraph('초보자를 위한 쉬운 풀이', S('c2', fontName='MalgunB', fontSize=18, leading=26, textColor=BLUE, alignment=TA_CENTER)),
-            Spacer(1, 8 * mm), Paragraph(f'기초 용어·통계·전처리·EDA·머신러닝·평가·KPI·분석 흐름·pandas 용어까지<br/>{N["ch"]}개 장 · 용어 {N["terms"]}개 · 그림 {N["figs"]}개 · 예제 {N["code"]}개 (실제 실행 결과 포함) · 퀴즈 {N["quiz"]}문제', sub),
+            Spacer(1, 8 * mm), Paragraph(f'기초 용어·통계·전처리·EDA·머신러닝·평가·KPI·분석 흐름·pandas<br/>그리고 딥러닝 학습·프롬프트 엔지니어링 용어까지<br/>{N["ch"]}개 장 · 용어 {N["terms"]}개 · 그림 {N["figs"]}개 · 예제 {N["code"]}개 (실제 실행 결과 포함) · 퀴즈 {N["quiz"]}문제', sub),
             Spacer(1, 60 * mm), Paragraph('강사 김대철', S('a', fontName='MalgunB', fontSize=13, alignment=TA_CENTER)),
             Spacer(1, 3 * mm), Paragraph(f'학습 앱: {APP_URL}', S('u', fontSize=10, textColor=BLUE, alignment=TA_CENTER)), PageBreak()]
 
